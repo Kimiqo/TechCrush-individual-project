@@ -1,0 +1,30 @@
+{
+  "name": "project_individual",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kimiqo/TechCrush-individual-project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Kimiqo/TechCrush-individual-project/issues"
+  },
+  "homepage": "https://github.com/Kimiqo/TechCrush-individual-project#readme",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "mysql2": "^3.14.1",
+    "nodemailer": "^7.0.3"
+  }
+}
