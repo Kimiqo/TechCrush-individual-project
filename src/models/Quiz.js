@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
+import User from './User.js';
 
 const Quiz = sequelize.define('Quiz', {
   id: {
@@ -18,6 +19,14 @@ const Quiz = sequelize.define('Quiz', {
       isEmail: true,
     },
   },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id',
+    },
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
@@ -26,5 +35,8 @@ const Quiz = sequelize.define('Quiz', {
   tableName: 'quizzes',
   timestamps: false,
 });
+
+Quiz.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Quiz, { foreignKey: 'userId' });
 
 export default Quiz;

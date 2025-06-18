@@ -1,13 +1,15 @@
 🧠 QuizMaster API
-QuizMaster API is a lightweight quiz management platform built as a solo project for the Tech Crush Internship. It allows users to create quizzes, submit answers, and receive email notifications, with interactive Swagger documentation for easy API exploration.
+QuizMaster API is a secure quiz management platform built as a solo project for the Tech Crush Internship. Authenticated users can create quizzes, submit answers, and receive email notifications at their registered email, with interactive Swagger documentation.
 
 🔧 Features
 👤 User
 
+Sign up and log in with email and password
+Receive a welcome email upon sign-up at registered email
 Create quizzes with multiple-choice questions
-Retrieve quizzes and view details
+Retrieve personal quizzes and view details
 Submit answers and get instant scores
-Receive email notifications for quiz creation and results
+Receive email notifications for quiz creation and results at registered email
 
 📜 API Documentation
 
@@ -35,6 +37,10 @@ ORM
 Sequelize
 
 
+Authentication
+JWT, bcrypt
+
+
 Email
 Nodemailer (Gmail)
 
@@ -52,6 +58,7 @@ dotenv for environment variables
 src/
 ├── config/       # Database, email, and Swagger configs
 ├── controllers/  # Route controllers
+├── middleware/   # Authentication middleware
 ├── models/       # Sequelize models
 ├── routes/       # Express routes
 └── index.js      # App entry point
@@ -60,8 +67,8 @@ src/
 🔐 Roles
 
 User
-Create, retrieve, and answer quizzes
-Receive email notifications
+Register, log in, create, retrieve, and answer quizzes
+Receive email notifications at registered email
 
 
 
@@ -104,6 +111,10 @@ DB_PORT=3306
 NODE_ENV=development
 EMAIL_USER=your_gmail_address
 EMAIL_PASS=your_gmail_app_password
+JWT_SECRET=your_jwt_secret
+
+
+Generate JWT_SECRET:openssl rand -base64 32
 
 
 
@@ -121,43 +132,62 @@ npm start
 Method
 Endpoint
 Description
+Auth Required
 
+
+
+POST
+/api/auth/signup
+Register a user
+No
+
+
+POST
+/api/auth/login
+Log in a user
+No
 
 
 POST
 /api/quizzes
 Create a quiz
+Yes
 
 
 GET
 /api/quizzes
-List all quizzes
+List user’s quizzes
+Yes
 
 
 GET
 /api/quizzes/:id
 Get quiz by ID
+Yes
 
 
 POST
 /api/quizzes/:id/answers
 Submit answers and get score
+Yes
 
 
 Explore detailed specs at http://localhost:3000/api-docs.
 
 📚 Swagger Documentation
-Access interactive API documentation at http://localhost:3000/api-docs after starting the server. Test endpoints, view schemas, and try requests directly in the Swagger UI.
+Access interactive API documentation at http://localhost:3000/api-docs. Test endpoints with JWT tokens, view schemas, and try requests in the Swagger UI.
 
 🧪 Testing
 
 Use Postman to test endpoints:
-Create quizzes with valid/invalid data
-Retrieve quizzes and submit answers
-Verify email notifications
+Sign up: POST /api/auth/signup (check welcome email)
+Log in: POST /api/auth/login to get a JWT token
+Add token to headers: Authorization: Bearer <token>
+Test quiz endpoints (verify notification emails)
 
 
-Check MySQL tables:SELECT * FROM quizzes;
+Check MySQL tables:SELECT * FROM users;
+SELECT * FROM quizzes;
 SELECT * FROM questions;
 SELECT * FROM email_logs;
 

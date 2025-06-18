@@ -1,18 +1,18 @@
 import { validationResult } from 'express-validator';
 import { Quiz, Question, EmailLog } from '../models/index.js';
 import { sendEmail } from '../config/email.js';
-import { Op } from 'sequelize';
 
 export const createQuiz = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-  const { title, email, questions } = req.body;
+  const { title, questions } = req.body;
+  const { id: userId, email } = req.user;
 
   const transaction = await Quiz.sequelize.transaction();
   try {
     // Create quiz
-    const quiz = await Quiz.create({ title, email }, { transaction });
+    const quiz = await Quiz.create({ title, email, userId }, { transaction });
 
     // Create questions
     const questionData = questions.map(q => ({
@@ -43,6 +43,7 @@ export const createQuiz = async (req, res) => {
 export const getQuizzes = async (req, res) => {
   try {
     const quizzes = await Quiz.findAll({
+      where: { userId: req.user.id },
       attributes: ['id', 'title', 'email', 'createdAt'],
     });
     res.json(quizzes);
@@ -55,7 +56,8 @@ export const getQuizzes = async (req, res) => {
 export const getQuiz = async (req, res) => {
   const { id } = req.params;
   try {
-    const quiz = await Quiz.findByPk(id, {
+    const quiz = await Quiz.findOne({
+      where: { id, userId: req.user.id },
       attributes: ['id', 'title', 'email', 'createdAt'],
       include: [{
         model: Question,
@@ -75,7 +77,8 @@ export const submitAnswers = async (req, res) => {
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
   const { id } = req.params;
-  const { email, answers } = req.body;
+  const { answers } = req.body;
+  const { email } = req.user;
 
   const transaction = await Quiz.sequelize.transaction();
   try {

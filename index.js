@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import quizRoutes from './src/routes/quizzes.js';
+import authRoutes from './src/routes/auth.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './src/config/swagger.js';
 import { connectDB } from './src/config/db.js';
@@ -10,6 +11,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use('/api/quizzes', quizRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Error handler

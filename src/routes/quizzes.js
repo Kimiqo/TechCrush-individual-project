@@ -1,6 +1,7 @@
 import express from 'express';
 import { check } from 'express-validator';
 import { createQuiz, getQuizzes, getQuiz, submitAnswers } from '../controllers/quizzes.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -17,21 +18,19 @@ const router = express.Router();
  *   post:
  *     summary: Create a new quiz
  *     tags: [Quizzes]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required: [title, email, questions]
+ *             required: [title, questions]
  *             properties:
  *               title:
  *                 type: string
  *                 example: General Knowledge Quiz
- *               email:
- *                 type: string
- *                 format: email
- *                 example: user@example.com
  *               questions:
  *                 type: array
  *                 minItems: 1
@@ -74,27 +73,20 @@ const router = express.Router();
  *                     type: object
  *       400:
  *         description: Invalid input
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 errors:
- *                   type: array
- *                   items:
- *                     type: object
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Server error
  */
 router.post(
   '/',
+  authenticate,
   [
     check('title').notEmpty().withMessage('Title is required'),
-    check('email').isEmail().withMessage('Valid email is required'),
     check('questions').isArray({ min: 1 }).withMessage('At least one question is required'),
     check('questions.*.questionText').notEmpty().withMessage('Question text is required'),
     check('questions.*.options').isArray({ min: 2 }).withMessage('At least two options are required'),
-    check('questions.*.correctOptionId').isInt().withMessage('Correct option ID is required')
+    check('questions.*.correctOptionId').isInt().withMessage('Correct option ID is required'),
   ],
   createQuiz
 );
@@ -103,8 +95,10 @@ router.post(
  * @swagger
  * /api/quizzes:
  *   get:
- *     summary: Get all quizzes
+ *     summary: Get all quizzes for the authenticated user
  *     tags: [Quizzes]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of quizzes
@@ -124,10 +118,12 @@ router.post(
  *                   createdAt:
  *                     type: string
  *                     format: date-time
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Server error
  */
-router.get('/', getQuizzes);
+router.get('/', authenticate, getQuizzes);
 
 /**
  * @swagger
@@ -135,6 +131,8 @@ router.get('/', getQuizzes);
  *   get:
  *     summary: Get a quiz by ID
  *     tags: [Quizzes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -176,12 +174,14 @@ router.get('/', getQuizzes);
  *                               type: string
  *                       correctOptionId:
  *                         type: integer
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Quiz not found
  *       500:
  *         description: Server error
  */
-router.get('/:id', getQuiz);
+router.get('/:id', authenticate, getQuiz);
 
 /**
  * @swagger
@@ -189,6 +189,8 @@ router.get('/:id', getQuiz);
  *   post:
  *     summary: Submit answers and get score
  *     tags: [Quizzes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -202,12 +204,8 @@ router.get('/:id', getQuiz);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [email, answers]
+ *             required: [answers]
  *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: user@example.com
  *               answers:
  *                 type: array
  *                 minItems: 1
@@ -237,6 +235,8 @@ router.get('/:id', getQuiz);
  *                   type: string
  *       400:
  *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Quiz not found
  *       500:
@@ -244,9 +244,9 @@ router.get('/:id', getQuiz);
  */
 router.post(
   '/:id/answers',
+  authenticate,
   [
-    check('email').isEmail().withMessage('Valid email is required'),
-    check('answers').isArray({ min: 1 }).withMessage('At least one answer is required')
+    check('answers').isArray({ min: 1 }).withMessage('At least one answer is required'),
   ],
   submitAnswers
 );
